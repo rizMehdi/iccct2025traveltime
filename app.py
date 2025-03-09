@@ -171,10 +171,14 @@ team_distances = calculate_team_distances(matches)
 # Convert to DataFrame for visualization
 df_team_distances = pd.DataFrame(list(team_distances.items()), columns=['Team', 'Distance'])
 
+# Add team colors to the DataFrame
+df_team_distances['Color'] = df_team_distances['Team'].map(team_colors)
+
 # Create a horizontal bar chart using Altair
 chart = alt.Chart(df_team_distances).mark_bar().encode(
     x='Distance:Q',
-    y=alt.Y('Team:N', sort='-x')
+    y=alt.Y('Team:N', sort='-x'),
+    color=alt.Color('Color:N', scale=None)  # Use team colors
 ).properties(
     title='Total Travel Distance per Team (km)'
 )

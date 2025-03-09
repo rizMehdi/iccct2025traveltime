@@ -38,7 +38,7 @@ team_colors = {
     "India": "darkblue",
     "South Africa": "darkgreen",
     "England": "darkred",
-    "Australia": "darkyellow",  # Updated to yellow and green
+    "Australia": "green",  # Updated to yellow and green
     "Afghanistan": "darkred",
 }
 
@@ -178,10 +178,10 @@ def add_plane_line(start, end, color, offset=0):
 
     # Offset the coordinates to create parallel lines if overlapping
     if offset != 0:
-        lat1 += offset / 100
-        lon1 += offset / 100
-        lat2 += offset / 100
-        lon2 += offset / 100
+        lat1 += offset / 10
+        lon1 += offset / 10
+        lat2 += offset / 10
+        lon2 += offset / 10
 
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(

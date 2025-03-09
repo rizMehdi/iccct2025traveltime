@@ -42,27 +42,27 @@ team_colors = {
 # Extract unique teams
 teams = sorted(set([team for match in matches for team in [match[1], match[3]]]))
 
-# Sidebar for team selection
-selected_team = st.sidebar.selectbox("Select a team to view travel route:", ["All Teams"] + teams)
+# Sidebar for team selection using multiselect
+selected_teams = st.sidebar.multiselect("Select Teams", teams, default=teams)
 
-# Filter matches for the selected team
-filtered_matches = [match for match in matches if selected_team in [match[1], match[3]]] if selected_team != "All Teams" else matches
+# Filter matches for the selected teams
+filtered_matches = [match for match in matches if match[1] in selected_teams or match[3] in selected_teams]
 
 # Sidebar Match List
-st.sidebar.write(f"### Matches for {selected_team}" if selected_team != "All Teams" else "### All Matches")
+st.sidebar.write("### Matches")
 for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
-    opponent = team2 if team1 == selected_team else team1
-    st.sidebar.write(f"📅 **{date}**: {selected_team} vs {opponent}\n- 🏟 **Venue:** {venue}\n- 🏆 **Result:** {result}")
+    opponent = team2 if team1 in selected_teams else team1
+    st.sidebar.write(f"📅 **{date}**: {team1} vs {opponent}\n- 🏟 **Venue:** {venue}\n- 🏆 **Result:** {result}")
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")
-st.write(f"Showing travel path for **{selected_team}**.")
+st.write(f"Showing travel paths for selected teams: {', '.join(selected_teams)}")
 
 # Keep map centered
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
 
-# Travel route sequence for selected team
+# Travel route sequence for selected teams
 travel_routes = []
 prev_venue = None
 
@@ -72,7 +72,7 @@ for match in filtered_matches:
     lat, lon = venues[venue]
 
     # Choose team color(s)
-    team_color = team_colors.get(team1 if team1 in result else team2, ["gray"])
+    team_color = team_colors.get(team1 if team1 in selected_teams else team2, ["gray"])
 
     # Add match details
     folium.Marker(

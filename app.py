@@ -32,13 +32,13 @@ matches = [
 
 # Assign colors to each team (Modified Australia to yellow + green)
 team_colors = {
-    "New Zealand": ["black", "darkgray"],
+    "New Zealand": ["black", "gray"],
     "Pakistan": ["green", "darkgreen"],
     "Bangladesh": ["green", "darkred"],
-    "India": ["blue", "darkorange"],
-    "South Africa": ["green", "darkblack"],
-    "England": ["red", "darkwhite"],
-    "Australia": ["yellow", "darkgreen"],  # Updated to yellow and green
+    "India": ["blue", "darkblue"],
+    "South Africa": ["green", "darkgreen"],
+    "England": ["red", "darkred"],
+    "Australia": ["yellow", "darkyellow"],  # Updated to yellow and green
     "Afghanistan": ["red", "darkred"],
 }
 
@@ -186,8 +186,9 @@ def add_plane_line(start, end, color, offset=0):
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
         [[lat1, lon1], [lat2, lon2]],
-        weight=5,  # Even thicker line
+        weight=15,  # Thicker line (3x the current)
         color=color,
+        opacity=0.5,  # Translucent lines
     ).add_to(m)
 
     # Add direction arrow

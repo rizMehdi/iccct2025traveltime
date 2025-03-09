@@ -233,7 +233,7 @@ def add_plane_line(start, end, color, offset=0):
 offset = 0
 for start, end, color in travel_routes:
     add_plane_line(start, end, color, offset)
-    offset += 0.1  # Increment offset for parallel lines
+    offset += 0.5  # Increment offset for parallel lines
     # offset += 0.01  # Increment offset for parallel lines
 
 # Display the map

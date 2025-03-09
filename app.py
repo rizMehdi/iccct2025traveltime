@@ -4,12 +4,12 @@ from streamlit_folium import folium_static
 import math
 from folium.plugins import AntPath
 
-# Match venues and their coordinates
+# Match venues and their coordinates (city only for the expander titles)
 venues = {
-    "National Stadium, Karachi": (24.8924, 67.0652),
-    "Gaddafi Stadium, Lahore": (31.5204, 74.3587),
-    "Rawalpindi Cricket Stadium, Rawalpindi": (33.6361, 73.0486),
-    "Dubai International Cricket Stadium, Dubai": (25.276987, 55.296249),
+    "National Stadium, Karachi": ("Karachi", (24.8924, 67.0652)),
+    "Gaddafi Stadium, Lahore": ("Lahore", (31.5204, 74.3587)),
+    "Rawalpindi Cricket Stadium, Rawalpindi": ("Rawalpindi", (33.6361, 73.0486)),
+    "Dubai International Cricket Stadium, Dubai": ("Dubai", (25.276987, 55.296249)),
 }
 
 # Match data (Date, Team1, Score1, Team2, Score2, Result, Venue)
@@ -72,9 +72,9 @@ def calculate_total_distance(matches, team):
     for match in matches:
         date, team1, score1, team2, score2, result, venue = match
         if team == team1 or team == team2:
-            lat, lon = venues[venue]
+            lat, lon = venues[venue][1]
             if prev_venue:
-                prev_lat, prev_lon = venues[prev_venue]
+                prev_lat, prev_lon = venues[prev_venue][1]
                 total_distance += haversine(prev_lat, prev_lon, lat, lon)
             prev_venue = venue
     return total_distance
@@ -90,11 +90,16 @@ else:
 with st.sidebar:
     for match in filtered_matches:
         date, team1, score1, team2, score2, result, venue = match
+        city = venues[venue][0]  # Extract city name for the expander title
         opponent = team2 if team1 == team_option or team_option == "All Teams" else team1
-        with st.expander(f"Match: {date} - {team1} vs {opponent}"):
-            st.write(f"🏟 **Venue**: {venue}")
-            st.write(f"📊 **Scores**: {team1} {score1} vs {team2} {score2}")
+        
+        with st.expander(f"{date} {city} {team1} vs {opponent}"):
+            st.write(f"🏟 **Full Location**: {venue}")
             st.write(f"🏆 **Result**: {result}")
+            if result != "Match abandoned" and result != "No result":
+                st.write(f"📊 **Scores**:")
+                st.write(f"   - {team1}: {score1}")
+                st.write(f"   - {team2}: {score2}")
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")
@@ -110,7 +115,7 @@ prev_venue = None
 # Add match details and connect travel paths
 for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
-    lat, lon = venues[venue]
+    lat, lon = venues[venue][1]
 
     # Choose team color(s)
     team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, ["gray"])
@@ -125,7 +130,7 @@ for match in filtered_matches:
 
     # Store travel route (for team-colored lines)
     if prev_venue:
-        travel_routes.append((venues[prev_venue], (lat, lon), team_color))
+        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
 
     prev_venue = venue
 

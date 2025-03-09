@@ -183,18 +183,14 @@ def add_plane_line(start, end, color, offset=0):
         lat2 += offset / 1000
         lon2 += offset / 1000
 
-    # Create a polyline with dashed lines representing planes
-    plane_line = folium.PolyLine(
-        [[lat1, lon1], [lat2, lon2]],
-        weight=10,  # Thicker line (3x the current)
+    # Create an animated polyline with dashed lines representing planes
+    plane_line = AntPath(
+        locations=[[lat1, lon1], [lat2, lon2]],
         color=color,
+        weight=10,  # Thicker line (3x the current)
         opacity=0.5,  # Translucent lines
-    ).add_to(m)
-
-    # Add direction arrow
-    attr = {"font-weight": "bold", "font-size": "24"}
-    PolyLineTextPath(
-        plane_line, "\u2708     ", repeat=True, offset=8, attributes=attr
+        dash_array=[10, 20],  # Dash pattern
+        delay=1000  # Animation delay
     ).add_to(m)
 
 # Add travel routes to the map with offsets for parallel lines

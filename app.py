@@ -91,6 +91,17 @@ if team_option != "All Teams":
 # else:
 #     st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
 
+# Function to determine match result emoji
+def get_result_emoji(result, team, team1, team2):
+    if "won" in result:
+        if team in result:
+            return "🟢"  # Green circle for win
+        else:
+            return "🔴"  # Red circle for loss
+    elif "No result" in result or "Match abandoned" in result:
+        return "🔵"  # Blue circle for draw
+    return ""
+
 # Sidebar for Match List with separate expanders
 with st.sidebar:
     if team_option == "All Teams":
@@ -109,9 +120,11 @@ with st.sidebar:
                 distance = haversine(lat1, lon1, lat2, lon2)
                 st.warning(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
             
-            with st.expander(f"{date}, {city}: {team1} vs {opponent}"):
+            result_emoji = get_result_emoji(result, team_option, team1, team2)
+            with st.expander(f"{date}, {city}: {team1} vs {team2} {result_emoji}"):
                 st.write(f"🏟 **{venue}**")
-                st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
+                if "Match abandoned" not in result and "No result" not in result:
+                    st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
                 st.write(f"🏆 {result}")
             
             prev_venue = venue

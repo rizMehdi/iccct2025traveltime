@@ -199,6 +199,9 @@ df_team_results = pd.DataFrame([
     for result, count in results.items()
 ])
 
+# Define the specified team order
+team_order = ["New Zealand", "South Africa", "Pakistan", "Australia", "Bangladesh", "Afghanistan", "England", "India"]
+
 # Create a horizontal bar chart using Altair for travel distances
 chart_distances = alt.Chart(df_team_distances).mark_bar().encode(
     x='Distance:Q',
@@ -211,7 +214,7 @@ chart_distances = alt.Chart(df_team_distances).mark_bar().encode(
 # Create a stacked bar chart using Altair for win/loss/draw counts
 chart_results = alt.Chart(df_team_results).mark_bar().encode(
     x='Count:Q',
-    y=alt.Y('Team:N', sort=df_team_distances['Team'].tolist()),  # Keep the same team order
+    y=alt.Y('Team:N', sort=team_order),  # Use the specified team order
     color=alt.Color('Result:N', scale=alt.Scale(domain=['Wins', 'Losses', 'Draws'], range=['green', 'red', 'blue']))
 ).properties(
     title='Match Results per Team'

@@ -69,22 +69,27 @@ def haversine(lat1, lon1, lat2, lon2):
 def calculate_total_distance(matches, team):
     total_distance = 0
     prev_venue = None
+    travel_details = []
     for match in matches:
         date, team1, score1, team2, score2, result, venue = match
         if team == team1 or team == team2:
             lat, lon = venues[venue][1]
             if prev_venue:
                 prev_lat, prev_lon = venues[prev_venue][1]
-                total_distance += haversine(prev_lat, prev_lon, lat, lon)
+                distance = haversine(prev_lat, prev_lon, lat, lon)
+                travel_details.append(f"Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
+                total_distance += distance
             prev_venue = venue
-    return total_distance
+    return total_distance, travel_details
 
 # Show travel kilometers below the dropdown
 if team_option != "All Teams":
-    total_distance = calculate_total_distance(filtered_matches, team_option)
-    st.sidebar.write(f"🚗 **Total Travel Distance for {team_option}**: {total_distance:.2f} km")
+    total_distance, travel_details = calculate_total_distance(filtered_matches, team_option)
+    st.sidebar.write(f"✈️ **Total Travel Distance for {team_option}: {total_distance:.2f} km**")
+    for detail in travel_details:
+        st.sidebar.write(detail)
 else:
-    st.sidebar.write("🚗 **Travel Distance for All Teams**: Calculated individually for each team")
+    st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
 
 # Sidebar for Match List with separate expanders
 with st.sidebar:

@@ -156,7 +156,7 @@ with st.sidebar:
             prev_venue = venue
 
 # Streamlit UI
-st.title("🏏 ICC Champions Trophy 2025 - Team Travel")
+st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
 
 # Keep map centered

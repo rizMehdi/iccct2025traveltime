@@ -207,11 +207,17 @@ def add_plane_line(start, end, color, offset=0):
     lat2, lon2 = end
 
     # Offset the coordinates to create parallel lines if overlapping
+    # if offset != 0:
+    #     lat1 += offset / 10
+    #     lon1 += offset / 10
+    #     lat2 += offset / 10
+    #     lon2 += offset / 10
+    
     if offset != 0:
-        lat1 += offset / 10
-        lon1 += offset / 10
-        lat2 += offset / 10
-        lon2 += offset / 10
+        lat1 += offset / 1
+        lon1 += offset / 1
+        lat2 += offset / 1
+        lon2 += offset / 1
 
     # Create an animated polyline with dashed lines representing planes
     plane_line = AntPath(
@@ -227,7 +233,8 @@ def add_plane_line(start, end, color, offset=0):
 offset = 0
 for start, end, color in travel_routes:
     add_plane_line(start, end, color, offset)
-    offset += 0.01  # Increment offset for parallel lines
+    offset += 1o  # Increment offset for parallel lines
+    # offset += 0.01  # Increment offset for parallel lines
 
 # Display the map
 folium_static(m)

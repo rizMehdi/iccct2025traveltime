@@ -134,26 +134,23 @@ for match in filtered_matches:
 
     prev_venue = venue
 
-# Function to add arrows to the path (Arrow will be part of the path line)
-def add_arrow_on_path(start, end, color):
+# Function to add plane-like dashed line
+def add_plane_line(start, end, color):
     lat1, lon1 = start
     lat2, lon2 = end
 
-    # Create the AntPath with animated arrows
-    path = [start, end]
-    AntPath(
-        locations=path,
-        color=color,
+    # Create a polyline with dashed lines representing planes
+    plane_line = folium.PolyLine(
+        [[lat1, lon1], [lat2, lon2]],
         weight=3,
-        opacity=0.8,
-        dash_array=[10, 10],  # Adjust this to make the path feel more "arrow-like"
-        delay=500,
+        color=color,
+        dash_array="5, 10",  # Dash pattern (less frequent planes)
     ).add_to(m)
 
-# Add animated travel paths with arrows (direction of travel)
+# Add plane-like travel paths
 for (start, end, colors) in travel_routes:
-    for i, color in enumerate(colors):
-        add_arrow_on_path(start, end, color)
+    for color in colors:
+        add_plane_line(start, end, color)
 
 # Display interactive map
 folium_static(m)

@@ -119,7 +119,7 @@ st.title("🏏 Cricket Tournament Travel & Match Visualization")
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
 
 # Keep map centered
-m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
+m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", scrollWheelZoom=False, zoomControl=False)
 
 # Travel route sequence for selected teams
 travel_routes = []

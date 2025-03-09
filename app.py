@@ -27,6 +27,18 @@ matches = [
     ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
 ]
 
+# Assign colors to each team (Modified to include two-color schemes for some teams)
+team_colors = {
+    "New Zealand": ["black", "white"],
+    "Pakistan": ["green", "white"],
+    "Bangladesh": ["green", "red"],
+    "India": ["blue", "orange"],
+    "South Africa": ["green", "black"],
+    "England": ["red", "white"],
+    "Australia": ["yellow"],
+    "Afghanistan": ["red"],
+}
+
 # Extract unique teams
 teams = sorted(set([team for match in matches for team in [match[1], match[3]]]))
 
@@ -59,35 +71,33 @@ for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
     lat, lon = venues[venue]
 
-    # Assign color based on match result
-    if "won" in result:
-        color = "green" if team1 in result else "red"
-    else:
-        color = "gray"
+    # Choose team color(s)
+    team_color = team_colors.get(team1 if team1 in result else team2, ["gray"])
 
     # Add match details
     folium.Marker(
         [lat, lon],
         popup=f"<b>{date}</b><br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
         tooltip=f"{date}: {team1} vs {team2}",
-        icon=folium.Icon(color=color),
+        icon=folium.Icon(color=team_color[0]),
     ).add_to(m)
 
-    # Store travel route
+    # Store travel route (for team-colored lines)
     if prev_venue:
-        travel_routes.append((venues[prev_venue], (lat, lon)))
+        travel_routes.append((venues[prev_venue], (lat, lon), team_color))
 
     prev_venue = venue
 
-# Add animated travel paths
-for (start, end) in travel_routes:
-    AntPath(
-        locations=[start, end],
-        dash_array=[10, 20],
-        weight=3,
-        color="blue",
-        delay=800,
-    ).add_to(m)
+# Add animated travel paths with team colors
+for (start, end, colors) in travel_routes:
+    for i, color in enumerate(colors):
+        AntPath(
+            locations=[start, end],
+            dash_array=[10, 20],
+            weight=3,
+            color=color,
+            delay=800 + (i * 200),  # Slight delay for each color transition
+        ).add_to(m)
 
 # Display interactive map
 folium_static(m)

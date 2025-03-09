@@ -26,6 +26,8 @@ matches = [
     ("28 Feb", "Afghanistan", "273 (50)", "Australia", "109/1 (12.5)", "No result", "Gaddafi Stadium, Lahore"),
     ("1 Mar", "England", "179 (38.2)", "South Africa", "181/3 (29.1)", "South Africa won by 7 wickets", "National Stadium, Karachi"),
     ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
+    ("4 Mar", "Australia", "264 (49.3)", "India", "267/6 (48.1)", "India won by 4 wickets", "Dubai International Cricket Stadium, Dubai"),
+    ("5 Mar", "New Zealand", "362/6 (50)", "South Africa", "312/9 (50)", "New Zealand won by 50 runs", "Gaddafi Stadium, Lahore"),
 ]
 
 # Assign colors to each team (Modified Australia to yellow + green)

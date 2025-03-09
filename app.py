@@ -32,14 +32,14 @@ matches = [
 
 # Assign colors to each team (Modified Australia to yellow + green)
 team_colors = {
-    "New Zealand": ["black", "gray"],
-    "Pakistan": ["green", "darkgreen"],
-    "Bangladesh": ["green", "darkred"],
-    "India": ["blue", "darkblue"],
-    "South Africa": ["green", "darkgreen"],
-    "England": ["red", "darkred"],
-    "Australia": ["green", "darkyellow"],  # Updated to yellow and green
-    "Afghanistan": ["red", "darkred"],
+    "New Zealand": "black",
+    "Pakistan": "green",
+    "Bangladesh": "darkred",
+    "India": "darkblue",
+    "South Africa": "darkgreen",
+    "England": "darkred",
+    "Australia": "darkyellow",  # Updated to yellow and green
+    "Afghanistan": "darkred",
 }
 
 # Extract unique teams
@@ -154,8 +154,8 @@ for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
     lat, lon = venues[venue][1]
 
-    # Choose team color(s)
-    team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, ["gray", "darkgray"])
+    # Choose team color
+    team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
 
     # Add match details
     folium.Marker(
@@ -167,7 +167,7 @@ for match in filtered_matches:
 
     # Store travel route (for team-colored lines)
     if prev_venue:
-        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color[1]))
+        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
 
     prev_venue = venue
 

@@ -102,6 +102,17 @@ with st.sidebar:
             st.write(f"🏟 **{venue}**")
             st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
             st.write(f"🏆 {result}")
+            
+            # Display travel distance if not the first venue
+            if result != "Match abandoned" and result != "No result":
+                if match != filtered_matches[0]:  # Skip first match for no travel
+                    prev_match = filtered_matches[filtered_matches.index(match) - 1]
+                    prev_venue = prev_match[6]  # Previous venue
+                    if prev_venue != venue:
+                        lat1, lon1 = venues[prev_venue][1]
+                        lat2, lon2 = venues[venue][1]
+                        distance = haversine(lat1, lon1, lat2, lon2)
+                        st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")
@@ -149,10 +160,4 @@ def add_plane_line(start, end, color):
         dash_array="5, 10",  # Dash pattern (less frequent planes)
     ).add_to(m)
 
-# Add plane-like travel paths
-for (start, end, colors) in travel_routes:
-    for color in colors:
-        add_plane_line(start, end, color)
-
-# Display interactive map
-folium_static(m)
+#

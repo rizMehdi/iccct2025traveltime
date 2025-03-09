@@ -164,10 +164,17 @@ for match in filtered_matches:
 
     prev_venue = venue
 
-# Function to add plane-like dashed line with direction
-def add_plane_line(start, end, color):
+# Function to add plane-like dashed line with direction in tube map style
+def add_plane_line(start, end, color, offset=0):
     lat1, lon1 = start
     lat2, lon2 = end
+
+    # Offset the coordinates to create parallel lines if overlapping
+    if offset != 0:
+        lat1 += offset
+        lon1 += offset
+        lat2 += offset
+        lon2 += offset
 
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
@@ -182,9 +189,11 @@ def add_plane_line(start, end, color):
         plane_line, "\u2708     ", repeat=True, offset=8, attributes=attr
     ).add_to(m)
 
-# Add travel routes to the map
+# Add travel routes to the map with offsets for parallel lines
+offset = 0
 for start, end, color in travel_routes:
-    add_plane_line(start, end, color)
+    add_plane_line(start, end, color, offset)
+    offset += 0.01  # Increment offset for parallel lines
 
 # Display the map
 folium_static(m)

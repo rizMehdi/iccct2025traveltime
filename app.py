@@ -147,7 +147,7 @@ for match in filtered_matches:
 
     prev_venue = venue
 
-# Function to add plane-like dashed line
+# Function to add plane-like dashed line with direction
 def add_plane_line(start, end, color):
     lat1, lon1 = start
     lat2, lon2 = end
@@ -158,6 +158,12 @@ def add_plane_line(start, end, color):
         weight=3,
         color=color,
         dash_array="5, 10",  # Dash pattern (less frequent planes)
+    ).add_to(m)
+
+    # Add direction arrow
+    folium.Marker(
+        location=[(lat1 + lat2) / 2, (lon1 + lon2) / 2],
+        icon=folium.DivIcon(html=f"""<div style="font-size: 12px; color: {color};">→</div>""")
     ).add_to(m)
 
 # Add travel routes to the map

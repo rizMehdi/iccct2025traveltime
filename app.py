@@ -93,7 +93,7 @@ with st.sidebar:
         city = venues[venue][0]  # Extract city name for the expander title
         opponent = team2 if team1 == team_option or team_option == "All Teams" else team1
         
-        with st.expander(f"{date} {city}: {team1} vs {opponent}"):
+        with st.expander(f"{date}, {city}: {team1} vs {opponent}"):
             st.write(f"🏟 **{venue}**")
             st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
             st.write(f"🏆 {result}")

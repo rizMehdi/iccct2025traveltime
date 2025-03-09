@@ -2,6 +2,7 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 from folium.plugins import AntPath
+import math
 
 # Match venues and their coordinates
 venues = {
@@ -51,6 +52,40 @@ if team_option == "All Teams":
 else:
     filtered_matches = [match for match in matches if team_option in [match[1], match[3]]]
 
+# Function to calculate distance between two points (Haversine formula)
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of the Earth in km
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = math.sin(delta_phi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return R * c  # Distance in km
+
+# Calculate total travel distance for the selected team
+def calculate_total_distance(matches, team):
+    total_distance = 0
+    prev_venue = None
+    for match in matches:
+        date, team1, score1, team2, score2, result, venue = match
+        if team == team1 or team == team2:
+            lat, lon = venues[venue]
+            if prev_venue:
+                prev_lat, prev_lon = venues[prev_venue]
+                total_distance += haversine(prev_lat, prev_lon, lat, lon)
+            prev_venue = venue
+    return total_distance
+
+# Show travel kilometers below the dropdown
+if team_option != "All Teams":
+    total_distance = calculate_total_distance(filtered_matches, team_option)
+    st.sidebar.write(f"🚗 **Total Travel Distance for {team_option}**: {total_distance:.2f} km")
+else:
+    st.sidebar.write("🚗 **Travel Distance for All Teams**: Calculated individually for each team")
+
 # Sidebar for Match List with separate expanders
 with st.sidebar:
     for match in filtered_matches:
@@ -94,7 +129,7 @@ for match in filtered_matches:
 
     prev_venue = venue
 
-# Add animated travel paths with team colors
+# Add animated travel paths with arrows (direction of travel)
 for (start, end, colors) in travel_routes:
     for i, color in enumerate(colors):
         AntPath(
@@ -103,6 +138,7 @@ for (start, end, colors) in travel_routes:
             weight=3,
             color=color,
             delay=800 + (i * 200),  # Slight delay for each color transition
+            arrow=True  # Adds arrows to indicate direction of travel
         ).add_to(m)
 
 # Display interactive map

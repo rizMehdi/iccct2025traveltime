@@ -4,7 +4,6 @@ from streamlit_folium import folium_static
 import math
 from folium.plugins import AntPath, PolyLineTextPath
 import time
-from streamlit_folium import geom_livemap, tilesets
 
 st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
 

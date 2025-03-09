@@ -257,9 +257,6 @@ if team_option == "All Teams":
     def add_offset(lat, lon, offset=0.005):
         return lat + offset, lon + offset
 
-    # Travel route sequence for all teams
-    travel_routes = calculate_all_teams_travel(matches)
-
     # Manage overlays in groups to ease superposition order
     outlines = folium.FeatureGroup("outlines")
     line_bg = folium.FeatureGroup("lineBg")
@@ -270,26 +267,35 @@ if team_option == "All Teams":
     line_colors = ["red", "#08f", "#0c0", "#f80"]
     stops = []
 
-    for start, end, color in travel_routes:
-        segment_coords = [start, end]
-        stops.append(start)
-        stops.append(end)
-        lines_on_segment = [0]  # Dummy value to represent a single line
-        segment_width = len(lines_on_segment) * (line_weight + 1)
-        folium.PolyLine(
-            segment_coords, color="#000", weight=segment_width + 5, opacity=1
-        ).add_to(outlines)
-        folium.PolyLine(
-            segment_coords, color="#fff", weight=segment_width + 3, opacity=1
-        ).add_to(line_bg)
-        for j, line_number in enumerate(lines_on_segment):
-            PolyLineOffset(
-                segment_coords,
-                color=color,
-                weight=line_weight,
-                opacity=1,
-                offset=j * (line_weight + 1) - (segment_width / 2) + ((line_weight + 1) / 2),
-            ).add_to(bus_lines)
+    # Check each team one by one and plot paths
+    for team in teams:
+        prev_venue = None
+        for match in matches:
+            date, team1, score1, team2, score2, result, venue = match
+            if team == team1 or team == team2:
+                lat, lon = venues[venue][1]
+                if prev_venue:
+                    prev_lat, prev_lon = venues[prev_venue][1]
+                    segment_coords = [[prev_lat, prev_lon], [lat, lon]]
+                    stops.append([prev_lat, prev_lon])
+                    stops.append([lat, lon])
+                    lines_on_segment = [0]  # Dummy value to represent a single line
+                    segment_width = len(lines_on_segment) * (line_weight + 1)
+                    folium.PolyLine(
+                        segment_coords, color="#000", weight=segment_width + 5, opacity=1
+                    ).add_to(outlines)
+                    folium.PolyLine(
+                        segment_coords, color="#fff", weight=segment_width + 3, opacity=1
+                    ).add_to(line_bg)
+                    for j, line_number in enumerate(lines_on_segment):
+                        PolyLineOffset(
+                            segment_coords,
+                            color=team_colors[team],
+                            weight=line_weight,
+                            opacity=1,
+                            offset=j * (line_weight + 1) - (segment_width / 2) + ((line_weight + 1) / 2),
+                        ).add_to(bus_lines)
+                prev_venue = venue
 
     # Draw bus stops
     for stop in stops:

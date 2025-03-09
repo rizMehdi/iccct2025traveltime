@@ -174,8 +174,33 @@ df_team_distances = pd.DataFrame(list(team_distances.items()), columns=['Team', 
 # Add team colors to the DataFrame
 df_team_distances['Color'] = df_team_distances['Team'].map(team_colors)
 
-# Create a horizontal bar chart using Altair
-chart = alt.Chart(df_team_distances).mark_bar().encode(
+# Function to calculate win/loss/draw counts for each team
+def calculate_team_results(matches):
+    team_results = {team: {'Wins': 0, 'Losses': 0, 'Draws': 0} for team in teams}
+    for match in matches:
+        team1, team2, result = match[1], match[3], match[5]
+        if "won" in result:
+            winner = team1 if team1 in result else team2
+            loser = team2 if winner == team1 else team1
+            team_results[winner]['Wins'] += 1
+            team_results[loser]['Losses'] += 1
+        elif "No result" in result or "Match abandoned" in result:
+            team_results[team1]['Draws'] += 1
+            team_results[team2]['Draws'] += 1
+    return team_results
+
+# Calculate win/loss/draw counts for all teams
+team_results = calculate_team_results(matches)
+
+# Convert to DataFrame for visualization
+df_team_results = pd.DataFrame([
+    {'Team': team, 'Result': result, 'Count': count}
+    for team, results in team_results.items()
+    for result, count in results.items()
+])
+
+# Create a horizontal bar chart using Altair for travel distances
+chart_distances = alt.Chart(df_team_distances).mark_bar().encode(
     x='Distance:Q',
     y=alt.Y('Team:N', sort='-x'),
     color=alt.Color('Color:N', scale=None)  # Use team colors
@@ -183,8 +208,21 @@ chart = alt.Chart(df_team_distances).mark_bar().encode(
     title='Total Travel Distance per Team (km)'
 )
 
-# Display the chart in the main window
-st.altair_chart(chart, use_container_width=True)
+# Create a stacked bar chart using Altair for win/loss/draw counts
+chart_results = alt.Chart(df_team_results).mark_bar().encode(
+    x='Count:Q',
+    y=alt.Y('Team:N', sort=df_team_distances['Team'].tolist()),  # Keep the same team order
+    color='Result:N'
+).properties(
+    title='Match Results per Team'
+)
+
+# Display the charts in two columns
+col1, col2 = st.columns(2)
+with col1:
+    st.altair_chart(chart_distances, use_container_width=True)
+with col2:
+    st.altair_chart(chart_results, use_container_width=True)
 
 # Streamlit UI
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")

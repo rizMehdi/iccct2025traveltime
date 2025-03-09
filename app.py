@@ -176,7 +176,7 @@ df_team_distances['Color'] = df_team_distances['Team'].map(team_colors)
 
 # Function to calculate win/loss/draw counts for each team
 def calculate_team_results(matches):
-    team_results = {team: {'Wins': 0, 'Losses': 0, 'Draws': 0} for team in teams}
+    team_results = {team: {'Wins': 0,  'Draws': 0,'Losses': 0} for team in teams}
     for match in matches:
         team1, team2, result = match[1], match[3], match[5]
         if "won" in result:

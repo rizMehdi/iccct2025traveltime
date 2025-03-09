@@ -4,6 +4,8 @@ from streamlit_folium import folium_static
 import math
 from folium.plugins import AntPath, PolyLineTextPath
 import time
+import pandas as pd
+import altair as alt
 
 st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
 
@@ -154,6 +156,31 @@ with st.sidebar:
                 st.write(f"🏆 {result}")
             
             prev_venue = venue
+
+# Function to calculate total travel distance for all teams
+def calculate_team_distances(matches):
+    team_distances = {team: 0 for team in teams}
+    for team in teams:
+        total_distance, _ = calculate_total_distance(matches, team)
+        team_distances[team] = total_distance
+    return team_distances
+
+# Calculate travel distances for all teams
+team_distances = calculate_team_distances(matches)
+
+# Convert to DataFrame for visualization
+df_team_distances = pd.DataFrame(list(team_distances.items()), columns=['Team', 'Distance'])
+
+# Create a horizontal bar chart using Altair
+chart = alt.Chart(df_team_distances).mark_bar().encode(
+    x='Distance:Q',
+    y=alt.Y('Team:N', sort='-x')
+).properties(
+    title='Total Travel Distance per Team (km)'
+)
+
+# Display the chart in the main window
+st.altair_chart(chart, use_container_width=True)
 
 # Streamlit UI
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")

@@ -2,7 +2,7 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 import math
-from folium.plugins import AntPath, PolyLineTextPath, PolyLineOffset
+from folium.plugins import AntPath, PolyLineTextPath
 import time
 import pandas as pd
 import altair as alt
@@ -251,84 +251,42 @@ if team_option == "All Teams":
         st.altair_chart(chart_results, use_container_width=True)
 
     # Keep map centered
-    m = folium.Map(location=[48.868, 2.365], zoom_start=15)
+    m = folium.Map(location=[28, 69], zoom_start=5, tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
 
-    # Define geojson for all teams' travel routes
-    geojson = {
-        "type": "FeatureCollection",
-        "features": [
-            # Add features for each team's travel routes
-            # Example:
-            {
-                "type": "Feature",
-                "properties": {"lines": [0]},
-                "geometry": {
-                    "type": "LineString",
-                    "coordinates": [
-                        [2.357919216156006, 48.87621773324153],
-                        [2.357339859008789, 48.874834693731664],
-                        [2.362983226776123, 48.86855408432749],
-                        [2.362382411956787, 48.86796126699168],
-                        [2.3633265495300293, 48.86735432768131],
-                    ],
-                },
-            },
-            # Add more features for other teams
-        ],
-    }
+    # Function to add offset to marker labels
+    def add_offset(lat, lon, offset=0.005):
+        return lat + offset, lon + offset
 
-    # Manage overlays in groups to ease superposition order
-    outlines = folium.FeatureGroup("outlines")
-    line_bg = folium.FeatureGroup("lineBg")
-    bus_lines = folium.FeatureGroup("busLines")
-    bus_stops = folium.FeatureGroup("busStops")
+    # Travel route sequence for all teams
+    travel_routes = calculate_all_teams_travel(matches)
 
-    line_weight = 6
-    line_colors = ["red", "#08f", "#0c0", "#f80"]
-    stops = []
-    for line_segment in geojson["features"]:
-        # Get every bus line coordinates
-        segment_coords = [[x[1], x[0]] for x in line_segment["geometry"]["coordinates"]]
-        # Get bus stops coordinates
-        stops.append(segment_coords[0])
-        stops.append(segment_coords[-1])
-        # Get number of bus lines sharing the same coordinates
-        lines_on_segment = line_segment["properties"]["lines"]
-        # Width of segment proportional to the number of bus lines
-        segment_width = len(lines_on_segment) * (line_weight + 1)
-        # For the white and black outline effect
-        folium.PolyLine(
-            segment_coords, color="#000", weight=segment_width + 5, opacity=1
-        ).add_to(outlines)
-        folium.PolyLine(
-            segment_coords, color="#fff", weight=segment_width + 3, opacity=1
-        ).add_to(line_bg)
-        # Draw parallel bus lines with different color and offset
-        for j, line_number in enumerate(lines_on_segment):
-            PolyLineOffset(
-                segment_coords,
-                color=line_colors[line_number],
-                weight=line_weight,
-                opacity=1,
-                offset=j * (line_weight + 1) - (segment_width / 2) + ((line_weight + 1) / 2),
-            ).add_to(bus_lines)
+    # Function to add plane-like dashed line with direction in tube map style
+    def add_plane_line(start, end, color, offset=0):
+        lat1, lon1 = start
+        lat2, lon2 = end
 
-    # Draw bus stops
-    for stop in stops:
-        folium.CircleMarker(
-            stop,
-            color="#000",
-            fill_color="#ccc",
-            fill_opacity=1,
-            radius=10,
-            weight=4,
-            opacity=1,
-        ).add_to(bus_stops)
+        # Offset the coordinates to create parallel lines if overlapping
+        if offset != 0:
+            lat1 += offset / 1
+            lon1 += offset / 1
+            lat2 += offset / 1
+            lon2 += offset / 1
 
-    outlines.add_to(m)
-    line_bg.add_to(m)
-    bus_lines.add_to(m)
-    bus_stops.add_to(m)
+        # Create an animated polyline with dashed lines representing planes
+        plane_line = AntPath(
+            locations=[[lat1, lon1], [lat2, lon2]],
+            color=color,
+            weight=5,  # Thicker line (3x the current)
+            opacity=0.5,  # Translucent lines
+            dash_array=[10, 20],  # Dash pattern
+            delay=1000  # Animation delay
+        ).add_to(m)
+
+    # Add travel routes to the map with offsets for parallel lines
+    offset = 0
+    for start, end, color in travel_routes:
+        add_plane_line(start, end, color, offset)
+        offset += 0.1  # Increment offset for parallel lines
 
     # Display the map
     folium_static(m, width=1600, height=800)

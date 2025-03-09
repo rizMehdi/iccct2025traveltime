@@ -11,7 +11,7 @@ venues = {
     "Dubai International Cricket Stadium, Dubai": (25.276987, 55.296249),
 }
 
-# Match results and travel sequence
+# Match data (Date, Team1, Score1, Team2, Score2, Result, Venue)
 matches = [
     ("19 Feb", "New Zealand", "320/5 (50)", "Pakistan", "260 (47.2)", "New Zealand won by 60 runs", "National Stadium, Karachi"),
     ("20 Feb", "Bangladesh", "228 (49.4)", "India", "231/4 (46.3)", "India won by 6 wickets", "Dubai International Cricket Stadium, Dubai"),
@@ -27,30 +27,31 @@ matches = [
     ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
 ]
 
+# Extract unique teams
+teams = sorted(set([team for match in matches for team in [match[1], match[3]]]))
+
+# Sidebar for team selection
+selected_team = st.sidebar.selectbox("Select a team to view travel route:", ["All Teams"] + teams)
+
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")
-st.write("Visualizing team travel & match results in Pakistan & UAE.")
+st.write(f"Showing travel path for **{selected_team}**.")
 
 # Center the map
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
 
-# Add venue markers
-for venue, coords in venues.items():
-    folium.Marker(
-        coords,
-        popup=f"<b>{venue}</b>",
-        tooltip=venue,
-        icon=folium.Icon(color="blue", icon="info-sign"),
-    ).add_to(m)
-
-# Travel route sequence based on match locations
+# Travel route sequence for selected team
 travel_routes = []
 prev_venue = None
 
-# Add match details and connect them with animated paths
+# Add match details and connect travel paths
 for match in matches:
     date, team1, score1, team2, score2, result, venue = match
     lat, lon = venues[venue]
+
+    # Filter matches based on selection
+    if selected_team != "All Teams" and selected_team not in [team1, team2]:
+        continue
 
     # Assign color based on match result
     if "won" in result:

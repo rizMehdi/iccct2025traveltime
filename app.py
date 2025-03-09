@@ -99,20 +99,21 @@ with st.sidebar:
         city = venues[venue][0]  # Extract city name for the expander title
         opponent = team2 if team1 == team_option or team_option == "All Teams" else team1
         
+        # Display travel distance if not the first venue
+        if prev_venue and prev_venue != venue:
+            lat1, lon1 = venues[prev_venue][1]
+            lat2, lon2 = venues[venue][1]
+            distance = haversine(lat1, lon1, lat2, lon2)
+            st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
+        elif prev_venue:
+            st.write("No Travel")
+        
         with st.expander(f"{date}, {city}: {team1} vs {opponent}"):
             st.write(f"🏟 **{venue}**")
             st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
             st.write(f"🏆 {result}")
-            
-            # Display travel distance if not the first venue
-            if prev_venue and prev_venue != venue:
-                lat1, lon1 = venues[prev_venue][1]
-                lat2, lon2 = venues[venue][1]
-                distance = haversine(lat1, lon1, lat2, lon2)
-                st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
-            else:
-                st.write("No Travel")
-            prev_venue = venue
+        
+        prev_venue = venue
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")

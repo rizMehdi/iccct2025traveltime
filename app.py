@@ -2,10 +2,8 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 from folium.plugins import AntPath
-import numpy as np
-from scipy.interpolate import interp1d
 
-# Venue coordinates (Pakistan & Dubai)
+# Match venues and their coordinates
 venues = {
     "National Stadium, Karachi": (24.8924, 67.0652),
     "Gaddafi Stadium, Lahore": (31.5204, 74.3587),
@@ -13,71 +11,75 @@ venues = {
     "Dubai International Cricket Stadium, Dubai": (25.276987, 55.296249),
 }
 
-# Travel data (Start, End, Travel Time in hours)
-travel_data = [
-    ("National Stadium, Karachi", "Gaddafi Stadium, Lahore", 1.5),
-    ("Gaddafi Stadium, Lahore", "Rawalpindi Cricket Stadium, Rawalpindi", 0.5),
-    ("Rawalpindi Cricket Stadium, Rawalpindi", "Dubai International Cricket Stadium, Dubai", 3.0),
-    ("Dubai International Cricket Stadium, Dubai", "National Stadium, Karachi", 2.5),
+# Match results and travel sequence
+matches = [
+    ("19 Feb", "New Zealand", "320/5 (50)", "Pakistan", "260 (47.2)", "New Zealand won by 60 runs", "National Stadium, Karachi"),
+    ("20 Feb", "Bangladesh", "228 (49.4)", "India", "231/4 (46.3)", "India won by 6 wickets", "Dubai International Cricket Stadium, Dubai"),
+    ("21 Feb", "South Africa", "315/6 (50)", "Afghanistan", "208 (43.3)", "South Africa won by 107 runs", "National Stadium, Karachi"),
+    ("22 Feb", "England", "351/8 (50)", "Australia", "356/5 (47.3)", "Australia won by 5 wickets", "Gaddafi Stadium, Lahore"),
+    ("23 Feb", "Pakistan", "241 (49.4)", "India", "244/4 (42.3)", "India won by 6 wickets", "Dubai International Cricket Stadium, Dubai"),
+    ("24 Feb", "Bangladesh", "236/9 (50)", "New Zealand", "240/5 (46.1)", "New Zealand won by 5 wickets", "Rawalpindi Cricket Stadium, Rawalpindi"),
+    ("25 Feb", "Australia", "-", "South Africa", "-", "Match abandoned", "Rawalpindi Cricket Stadium, Rawalpindi"),
+    ("26 Feb", "Afghanistan", "325/7 (50)", "England", "317 (49.5)", "Afghanistan won by 8 runs", "Gaddafi Stadium, Lahore"),
+    ("27 Feb", "Pakistan", "-", "Bangladesh", "-", "Match abandoned", "Rawalpindi Cricket Stadium, Rawalpindi"),
+    ("28 Feb", "Afghanistan", "273 (50)", "Australia", "109/1 (12.5)", "No result", "Gaddafi Stadium, Lahore"),
+    ("1 Mar", "England", "179 (38.2)", "South Africa", "181/3 (29.1)", "South Africa won by 7 wickets", "National Stadium, Karachi"),
+    ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
 ]
 
 # Streamlit UI
-st.title("🏏 Cricket Team Travel Visualization")
-st.write("Smooth curved travel paths between match venues in Pakistan & UAE.")
+st.title("🏏 Cricket Tournament Travel & Match Visualization")
+st.write("Visualizing team travel & match results in Pakistan & UAE.")
 
-# Center the map around Pakistan & Dubai
+# Center the map
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
 
 # Add venue markers
-for city, (lat, lon) in venues.items():
+for venue, coords in venues.items():
     folium.Marker(
-        [lat, lon], 
-        popup=f"<b>{city}</b>", 
-        tooltip=city, 
-        icon=folium.Icon(color="blue", icon="info-sign")
+        coords,
+        popup=f"<b>{venue}</b>",
+        tooltip=venue,
+        icon=folium.Icon(color="blue", icon="info-sign"),
     ).add_to(m)
 
-# Function to generate smooth Bezier curve between two points
-def bezier_curve(start, end, control_offset=3, num_points=30):
-    lat1, lon1 = start
-    lat2, lon2 = end
+# Travel route sequence based on match locations
+travel_routes = []
+prev_venue = None
 
-    # Control point to create curvature (Offset for a nice curve)
-    control_lat = (lat1 + lat2) / 2 + control_offset
-    control_lon = (lon1 + lon2) / 2 - control_offset
+# Add match details and connect them with animated paths
+for match in matches:
+    date, team1, score1, team2, score2, result, venue = match
+    lat, lon = venues[venue]
 
-    # Create parameterized values
-    t = np.linspace(0, 1, num_points)
-    
-    # Compute Bezier curve points
-    curve_lats = (1 - t) ** 2 * lat1 + 2 * (1 - t) * t * control_lat + t ** 2 * lat2
-    curve_lons = (1 - t) ** 2 * lon1 + 2 * (1 - t) * t * control_lon + t ** 2 * lon2
+    # Assign color based on match result
+    if "won" in result:
+        color = "green" if team1 in result else "red"
+    else:
+        color = "gray"
 
-    return list(zip(curve_lats, curve_lons))
+    # Add match details
+    folium.Marker(
+        [lat, lon],
+        popup=f"<b>{date}</b><br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
+        tooltip=f"{date}: {team1} vs {team2}",
+        icon=folium.Icon(color=color),
+    ).add_to(m)
 
-# Add animated smooth travel paths
-for start, end, time in travel_data:
-    start_coords = venues[start]
-    end_coords = venues[end]
+    # Store travel route
+    if prev_venue:
+        travel_routes.append((venues[prev_venue], (lat, lon)))
 
-    # Generate a smooth Bezier curve
-    curve_path = bezier_curve(start_coords, end_coords)
+    prev_venue = venue
 
-    # Animated AntPath for movement
+# Add animated travel paths
+for (start, end) in travel_routes:
     AntPath(
-        locations=curve_path, 
-        dash_array=[10, 20], 
-        weight=3, 
-        color="red", 
-        delay=800
-    ).add_to(m)
-
-    # Travel time popup at midpoint
-    midpoint = curve_path[len(curve_path) // 2]
-    folium.Marker(
-        midpoint,
-        popup=f"{time} hrs",
-        icon=folium.DivIcon(html=f"<b>{time}h</b>")
+        locations=[start, end],
+        dash_array=[10, 20],
+        weight=3,
+        color="blue",
+        delay=800,
     ).add_to(m)
 
 # Display interactive map

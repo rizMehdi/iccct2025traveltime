@@ -33,11 +33,21 @@ teams = sorted(set([team for match in matches for team in [match[1], match[3]]])
 # Sidebar for team selection
 selected_team = st.sidebar.selectbox("Select a team to view travel route:", ["All Teams"] + teams)
 
+# Filter matches for the selected team
+filtered_matches = [match for match in matches if selected_team in [match[1], match[3]]] if selected_team != "All Teams" else matches
+
+# Sidebar Match List
+st.sidebar.write(f"### Matches for {selected_team}" if selected_team != "All Teams" else "### All Matches")
+for match in filtered_matches:
+    date, team1, score1, team2, score2, result, venue = match
+    opponent = team2 if team1 == selected_team else team1
+    st.sidebar.write(f"📅 **{date}**: {selected_team} vs {opponent}\n- 🏟 **Venue:** {venue}\n- 🏆 **Result:** {result}")
+
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")
 st.write(f"Showing travel path for **{selected_team}**.")
 
-# Center the map
+# Keep map centered
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
 
 # Travel route sequence for selected team
@@ -45,13 +55,9 @@ travel_routes = []
 prev_venue = None
 
 # Add match details and connect travel paths
-for match in matches:
+for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
     lat, lon = venues[venue]
-
-    # Filter matches based on selection
-    if selected_team != "All Teams" and selected_team not in [team1, team2]:
-        continue
 
     # Assign color based on match result
     if "won" in result:

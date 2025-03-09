@@ -215,7 +215,7 @@ chart_distances = alt.Chart(df_team_distances).mark_bar().encode(
 chart_results = alt.Chart(df_team_results).mark_bar().encode(
     x='Count:Q',
     y=alt.Y('Team:N', sort=team_order),  # Use the specified team order
-    color=alt.Color('Result:N', scale=alt.Scale(domain=['Wins',  'Draws', 'Losses'], range=['green', 'blue', 'red']))
+    color=alt.Color('Result:N', scale=alt.Scale(domain=['Losses', 'Draws', 'Wins'], range=['red', 'blue', 'green']))
 ).properties(
     title='Match Results per Team'
 )

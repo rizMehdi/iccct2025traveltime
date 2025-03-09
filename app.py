@@ -123,7 +123,7 @@ with st.sidebar:
                 st.warning(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
             
             result_emoji = get_result_emoji(result, team_option, team1, team2)
-            with st.expander(f"{date}, {city}: {team1} vs {team2} {result_emoji}"):
+            with st.expander(f"{result_emoji} {date}, {city}: {team1} vs {team2}"):
                 st.write(f"🏟 **{venue}**")
                 if "Match abandoned" not in result and "No result" not in result:
                     st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
@@ -179,7 +179,7 @@ def add_plane_line(start, end, color, offset=0):
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
         [[lat1, lon1], [lat2, lon2]],
-        weight=3,  # Thicker line
+        weight=5,  # Even thicker line
         color=color,
     ).add_to(m)
 

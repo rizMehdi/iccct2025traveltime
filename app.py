@@ -31,6 +31,7 @@ matches = [
     ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
     ("4 Mar", "Australia", "264 (49.3)", "India", "267/6 (48.1)", "India won by 4 wickets", "Dubai International Cricket Stadium, Dubai"),
     ("5 Mar", "New Zealand", "362/6 (50)", "South Africa", "312/9 (50)", "New Zealand won by 50 runs", "Gaddafi Stadium, Lahore"),
+    ("9 Mar", "New Zealand", "-", "India", "-", "Match to be played", "Dubai International Cricket Stadium, Dubai"),
 ]
 
 # Assign colors to each team (as close as possible to their cricket team colors)
@@ -39,7 +40,7 @@ team_colors = {
     "Pakistan": "green",
     "Bangladesh": "darkgreen",
     "India": "blue",
-    "South Africa": "yellow",
+    "South Africa": "darkyellow",  # Updated to a less bright color
     "England": "darkblue",
     "Australia": "gold",
     "Afghanistan": "red",
@@ -48,7 +49,6 @@ team_colors = {
 # Extract unique teams
 teams = sorted(set([team for match in matches for team in [match[1], match[3]]]))
 option_map = {team: team for team in teams}
-option_map["All Teams"] = "All Teams"
 
 # Sidebar for team selection using pills widget
 team_option = st.sidebar.pills(
@@ -56,13 +56,11 @@ team_option = st.sidebar.pills(
     options=option_map.keys(),
     format_func=lambda option: option_map[option],
     selection_mode="single",
+    default="Afghanistan"  # Set Afghanistan as the default selected team
 )
 
 # Filter matches for the selected team
-if team_option == "All Teams":
-    filtered_matches = matches
-else:
-    filtered_matches = [match for match in matches if team_option in [match[1], match[3]]]
+filtered_matches = [match for match in matches if team_option in [match[1], match[3]]]
 
 # Function to calculate distance between two points (Haversine formula)
 def haversine(lat1, lon1, lat2, lon2):
@@ -163,6 +161,10 @@ st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' e
 # Keep map centered
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
 
+# Function to add offset to marker labels
+def add_offset(lat, lon, offset=0.005):
+    return lat + offset, lon + offset
+
 # Travel route sequence for selected teams
 travel_routes = []
 if team_option == "All Teams":
@@ -185,8 +187,9 @@ else:
 
         # Add match details with match number using DivIcon
         city = venues[venue][0]
+        offset_lat, offset_lon = add_offset(lat, lon)
         folium.Marker(
-            location=[lat, lon],
+            location=[offset_lat, offset_lon],
             popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
             icon=folium.DivIcon(html=f"""<div style="font-family: verdana; color: black; font-weight: bold">{city}</div>""")
         ).add_to(m)

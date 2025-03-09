@@ -160,4 +160,9 @@ def add_plane_line(start, end, color):
         dash_array="5, 10",  # Dash pattern (less frequent planes)
     ).add_to(m)
 
-#
+# Add travel routes to the map
+for start, end, color in travel_routes:
+    add_plane_line(start, end, color[0])
+
+# Display the map
+folium_static(m)

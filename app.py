@@ -5,6 +5,11 @@ import math
 from folium.plugins import AntPath, PolyLineTextPath
 import time
 
+
+st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
+st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
+
+
 # Match venues and their coordinates (city only for the expander titles)
 venues = {
     "National Stadium, Karachi": ("Karachi", (24.8924, 67.0652)),
@@ -156,8 +161,6 @@ with st.sidebar:
             prev_venue = venue
 
 # Streamlit UI
-st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
-st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
 
 # Keep map centered
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", scrollWheelZoom=False, zoomControl=False)

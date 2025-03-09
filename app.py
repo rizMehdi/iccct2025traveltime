@@ -7,6 +7,21 @@ import time
 import pandas as pd
 import altair as alt
 
+# Force wide mode and always expanded sidebar
+st.set_page_config(layout="wide", initial_sidebar_state="expanded")
+
+# Change sidebar width
+st.markdown(
+    """
+    <style>
+        section[data-testid="stSidebar"] {
+            width: 500px !important; /* Set the width to your desired value */
+        }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
 
 # Match venues and their coordinates (city only for the expander titles)

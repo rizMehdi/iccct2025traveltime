@@ -32,14 +32,14 @@ matches = [
 
 # Assign colors to each team (Modified Australia to yellow + green)
 team_colors = {
-    "New Zealand": ["black", "white"],
-    "Pakistan": ["green", "white"],
-    "Bangladesh": ["green", "red"],
-    "India": ["blue", "orange"],
-    "South Africa": ["green", "black"],
-    "England": ["red", "white"],
-    "Australia": ["yellow", "green"],  # Updated to yellow and green
-    "Afghanistan": ["red"],
+    "New Zealand": ["black", "darkgray"],
+    "Pakistan": ["green", "darkgreen"],
+    "Bangladesh": ["green", "darkred"],
+    "India": ["blue", "darkorange"],
+    "South Africa": ["green", "darkblack"],
+    "England": ["red", "darkwhite"],
+    "Australia": ["yellow", "darkgreen"],  # Updated to yellow and green
+    "Afghanistan": ["red", "darkred"],
 }
 
 # Extract unique teams
@@ -148,19 +148,19 @@ for match in filtered_matches:
     lat, lon = venues[venue][1]
 
     # Choose team color(s)
-    team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, ["gray"])
+    team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, ["gray", "darkgray"])
 
     # Add match details
     folium.Marker(
         [lat, lon],
         popup=f"<b>{date}</b><br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
         tooltip=f"{date}: {team1} vs {team2}",
-        icon=folium.Icon(color=team_color[0]),
+        icon=folium.Icon(color="red"),
     ).add_to(m)
 
     # Store travel route (for team-colored lines)
     if prev_venue:
-        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
+        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color[1]))
 
     prev_venue = venue
 
@@ -172,7 +172,7 @@ def add_plane_line(start, end, color):
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
         [[lat1, lon1], [lat2, lon2]],
-        weight=1,
+        weight=3,  # Thicker line
         color=color,
     ).add_to(m)
 
@@ -184,7 +184,7 @@ def add_plane_line(start, end, color):
 
 # Add travel routes to the map
 for start, end, color in travel_routes:
-    add_plane_line(start, end, color[0])
+    add_plane_line(start, end, color)
 
 # Display the map
 folium_static(m)

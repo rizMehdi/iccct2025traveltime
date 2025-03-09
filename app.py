@@ -180,7 +180,7 @@ else:
         folium.Marker(
             location=[lat, lon],
             popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-            icon=folium.DivIcon(html=f"""<div style="font-family: courier new; color: blue">{team1} vs {team2}</div>""")
+            icon=folium.DivIcon(html=f"""<div style="font-family: courier new; color: blue">{venue}</div>""")
         ).add_to(m)
 
         # Store travel route (for team-colored lines)

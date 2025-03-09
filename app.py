@@ -92,14 +92,30 @@ def calculate_total_distance(matches, team):
             prev_venue = venue
     return total_distance, travel_details
 
+# Function to calculate travel routes for all teams
+def calculate_all_teams_travel(matches):
+    travel_routes = []
+    for team in teams:
+        prev_venue = None
+        for match in matches:
+            date, team1, score1, team2, score2, result, venue = match
+            if team == team1 or team == team2:
+                lat, lon = venues[venue][1]
+                if prev_venue:
+                    prev_lat, prev_lon = venues[prev_venue][1]
+                    travel_routes.append((venues[prev_venue][1], (lat, lon), team_colors[team]))
+                prev_venue = venue
+    return travel_routes
+
 # Show travel kilometers below the dropdown
 if team_option != "All Teams":
     total_distance, travel_details = calculate_total_distance(filtered_matches, team_option)
     st.sidebar.write(f"✈️ **Total Travel Distance for {team_option}: {total_distance:.2f} km**")
 #     for detail in travel_details:
 #         st.sidebar.write(detail)
-# else:
-#     st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
+else:
+    travel_routes = calculate_all_teams_travel(matches)
+    st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
 
 # Function to determine match result emoji
 def get_result_emoji(result, team, team1, team2):
@@ -148,31 +164,32 @@ m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", scrollW
 
 # Travel route sequence for selected teams
 travel_routes = []
-prev_venue = None
-match_number = 1
+if team_option == "All Teams":
+    travel_routes = calculate_all_teams_travel(filtered_matches)
+else:
+    prev_venue = None
+    match_number = 1
+    for match in filtered_matches:
+        date, team1, score1, team2, score2, result, venue = match
+        lat, lon = venues[venue][1]
 
-# Add match details and connect travel paths
-for match in filtered_matches:
-    date, team1, score1, team2, score2, result, venue = match
-    lat, lon = venues[venue][1]
+        # Choose team color
+        team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
 
-    # Choose team color
-    team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
+        # Add match details with match number
+        folium.Marker(
+            [lat, lon],
+            popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
+            tooltip=f"Match {match_number}: {date}: {team1} vs {team2}",
+            icon=folium.Icon(color="red"),
+        ).add_to(m)
 
-    # Add match details with match number
-    folium.Marker(
-        [lat, lon],
-        popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-        tooltip=f"Match {match_number}: {date}: {team1} vs {team2}",
-        icon=folium.Icon(color="red"),
-    ).add_to(m)
+        # Store travel route (for team-colored lines)
+        if prev_venue:
+            travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
 
-    # Store travel route (for team-colored lines)
-    if prev_venue:
-        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
-
-    prev_venue = venue
-    match_number += 1
+        prev_venue = venue
+        match_number += 1
 
 # Function to add plane-like dashed line with direction in tube map style
 def add_plane_line(start, end, color, offset=0):

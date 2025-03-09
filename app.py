@@ -178,15 +178,15 @@ def add_plane_line(start, end, color, offset=0):
 
     # Offset the coordinates to create parallel lines if overlapping
     if offset != 0:
-        lat1 += offset
-        lon1 += offset
-        lat2 += offset
-        lon2 += offset
+        lat1 += offset / 100
+        lon1 += offset / 100
+        lat2 += offset / 100
+        lon2 += offset / 100
 
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
         [[lat1, lon1], [lat2, lon2]],
-        weight=15,  # Thicker line (3x the current)
+        weight=10,  # Thicker line (3x the current)
         color=color,
         opacity=0.5,  # Translucent lines
     ).add_to(m)
@@ -201,7 +201,7 @@ def add_plane_line(start, end, color, offset=0):
 offset = 0
 for start, end, color in travel_routes:
     add_plane_line(start, end, color, offset)
-    offset += 0.01  # Increment offset for parallel lines
+    offset += 10  # Increment offset for parallel lines
 
 # Display the map
 folium_static(m)

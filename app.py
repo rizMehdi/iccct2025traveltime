@@ -313,4 +313,4 @@ else:
         # offset += 0.01  # Increment offset for parallel lines
 
     # Display the map
-    folium_static(m)
+    folium_static(m, width=1200, height=800)

@@ -177,10 +177,11 @@ else:
         team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
 
         # Add match details with match number using DivIcon
+        city = venues[venue][0]
         folium.Marker(
             location=[lat, lon],
             popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-            icon=folium.DivIcon(html=f"""<div style="font-family: courier new; color: blue">{venue}</div>""")
+            icon=folium.DivIcon(html=f"""<div style="font-family: ariel; color: black; font-weight: bold">{city}</div>""")
         ).add_to(m)
 
         # Store travel route (for team-colored lines)

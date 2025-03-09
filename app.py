@@ -2,8 +2,10 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 from folium.plugins import AntPath
+from geopy.distance import great_circle
+import numpy as np
 
-# Updated venue coordinates (Pakistan & Dubai)
+# Venue coordinates (Pakistan & Dubai)
 venues = {
     "National Stadium, Karachi": (24.8924, 67.0652),
     "Gaddafi Stadium, Lahore": (31.5204, 74.3587),
@@ -11,7 +13,7 @@ venues = {
     "Dubai International Cricket Stadium, Dubai": (25.276987, 55.296249),
 }
 
-# Travel data: (City A, City B, Travel Time in hours)
+# Travel data (Start, End, Travel Time in hours)
 travel_data = [
     ("National Stadium, Karachi", "Gaddafi Stadium, Lahore", 1.5),
     ("Gaddafi Stadium, Lahore", "Rawalpindi Cricket Stadium, Rawalpindi", 0.5),
@@ -21,7 +23,7 @@ travel_data = [
 
 # Streamlit UI
 st.title("🏏 Cricket Team Travel Visualization")
-st.write("Animated travel paths between match venues in Pakistan & UAE.")
+st.write("Smooth curved travel paths between match venues in Pakistan & UAE.")
 
 # Center the map around Pakistan & Dubai
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
@@ -35,20 +37,29 @@ for city, (lat, lon) in venues.items():
         icon=folium.Icon(color="blue", icon="info-sign")
     ).add_to(m)
 
-# Add animated curved travel routes
+# Function to generate curved path using great-circle interpolation
+def generate_curve(start_coords, end_coords, num_points=20):
+    lats = np.linspace(start_coords[0], end_coords[0], num_points)
+    lons = np.linspace(start_coords[1], end_coords[1], num_points)
+
+    # Add a slight offset to the middle points to create a curve effect
+    mid_idx = len(lats) // 2
+    lats[mid_idx] += 1.5  # Increase latitude for curve
+    lons[mid_idx] -= 1.5  # Decrease longitude for curve
+
+    return list(zip(lats, lons))
+
+# Add animated curved travel paths
 for start, end, time in travel_data:
     start_coords = venues[start]
     end_coords = venues[end]
 
-    # Compute a midpoint for the curve
-    midpoint = [
-        (start_coords[0] + end_coords[0]) / 2 + 1,  # Offset latitude for curve effect
-        (start_coords[1] + end_coords[1]) / 2 - 1   # Offset longitude for curve effect
-    ]
+    # Generate a smooth curved path
+    curve_path = generate_curve(start_coords, end_coords)
 
-    # Animated AntPath with a curve
+    # Animated AntPath for movement
     AntPath(
-        locations=[start_coords, midpoint, end_coords], 
+        locations=curve_path, 
         dash_array=[10, 20], 
         weight=3, 
         color="red", 
@@ -56,6 +67,7 @@ for start, end, time in travel_data:
     ).add_to(m)
 
     # Travel time popup at midpoint
+    midpoint = curve_path[len(curve_path) // 2]
     folium.Marker(
         midpoint,
         popup=f"{time} hrs",

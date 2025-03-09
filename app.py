@@ -33,16 +33,16 @@ matches = [
     ("5 Mar", "New Zealand", "362/6 (50)", "South Africa", "312/9 (50)", "New Zealand won by 50 runs", "Gaddafi Stadium, Lahore"),
 ]
 
-# Assign colors to each team (Modified Australia to yellow + green)
+# Assign colors to each team (as close as possible to their cricket team colors)
 team_colors = {
     "New Zealand": "black",
     "Pakistan": "green",
-    "Bangladesh": "darkred",
-    "India": "darkblue",
-    "South Africa": "darkgreen",
-    "England": "darkred",
-    "Australia": "green",  # Updated to yellow and green
-    "Afghanistan": "darkred",
+    "Bangladesh": "darkgreen",
+    "India": "blue",
+    "South Africa": "yellow",
+    "England": "darkblue",
+    "Australia": "gold",
+    "Afghanistan": "red",
 }
 
 # Extract unique teams

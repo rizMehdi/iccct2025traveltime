@@ -240,14 +240,8 @@ chart_results = alt.Chart(df_team_results).mark_bar().encode(
 
 # Display the charts in two columns if "All Teams" is selected
 if team_option == "All Teams":
-    col1, col2 = st.columns(2)
-    with col1:
-        st.altair_chart(chart_distances, use_container_width=True)
-    with col2:
-        st.altair_chart(chart_results, use_container_width=True)
-else:
     # Streamlit UI
-    st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
+    st.write("Showing travel paths for all teams")
 
     # Keep map centered
     m = folium.Map(location=[28, 69], zoom_start=5, tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
@@ -256,41 +250,8 @@ else:
     def add_offset(lat, lon, offset=0.005):
         return lat + offset, lon + offset
 
-    # Travel route sequence for selected teams
-    travel_routes = []
-    if team_option == "All Teams":
-        travel_routes = calculate_all_teams_travel(filtered_matches)
-    else:
-        prev_venue = None
-        match_number = 1
-        for match in filtered_matches:
-            date, team1, score1, team2, score2, result, venue = match
-            lat, lon = venues[venue][1]
-
-            # Choose team color of the team that is changing venue
-            if prev_venue:
-                if team1 == team_option:
-                    team_color = team_colors.get(team1, "gray")
-                else:
-                    team_color = team_colors.get(team2, "gray")
-            else:
-                team_color = team_colors.get(team1 if team1 == team_option else team2, "gray")
-
-            # Add match details with match number using DivIcon
-            city = venues[venue][0]
-            offset_lat, offset_lon = add_offset(lat, lon)
-            folium.Marker(
-                location=[offset_lat, offset_lon],
-                popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-                icon=folium.DivIcon(html=f"""<div style="font-family: verdana; color: black; font-weight: bold">{city}</div>""")
-            ).add_to(m)
-
-            # Store travel route (for team-colored lines)
-            if prev_venue:
-                travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
-
-            prev_venue = venue
-            match_number += 1
+    # Travel route sequence for all teams
+    travel_routes = calculate_all_teams_travel(matches)
 
     # Function to add plane-like dashed line with direction in tube map style
     def add_plane_line(start, end, color, offset=0):
@@ -298,12 +259,6 @@ else:
         lat2, lon2 = end
 
         # Offset the coordinates to create parallel lines if overlapping
-        # if offset != 0:
-        #     lat1 += offset / 10
-        #     lon1 += offset / 10
-        #     lat2 += offset / 10
-        #     lon2 += offset / 10
-        
         if offset != 0:
             lat1 += offset / 1
             lon1 += offset / 1
@@ -325,7 +280,80 @@ else:
     for start, end, color in travel_routes:
         add_plane_line(start, end, color, offset)
         offset += 0.1  # Increment offset for parallel lines
-        # offset += 0.01  # Increment offset for parallel lines
+
+    # Display the map
+    folium_static(m, width=1600, height=800)
+else:
+    # Streamlit UI
+    st.write(f"Showing travel paths for {team_option}")
+
+    # Keep map centered
+    m = folium.Map(location=[28, 69], zoom_start=5, tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
+
+    # Function to add offset to marker labels
+    def add_offset(lat, lon, offset=0.005):
+        return lat + offset, lon + offset
+
+    # Travel route sequence for selected team
+    travel_routes = []
+    prev_venue = None
+    match_number = 1
+    for match in filtered_matches:
+        date, team1, score1, team2, score2, result, venue = match
+        lat, lon = venues[venue][1]
+
+        # Choose team color of the team that is changing venue
+        if prev_venue:
+            if team1 == team_option:
+                team_color = team_colors.get(team1, "gray")
+            else:
+                team_color = team_colors.get(team2, "gray")
+        else:
+            team_color = team_colors.get(team1 if team1 == team_option else team2, "gray")
+
+        # Add match details with match number using DivIcon
+        city = venues[venue][0]
+        offset_lat, offset_lon = add_offset(lat, lon)
+        folium.Marker(
+            location=[offset_lat, offset_lon],
+            popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
+            icon=folium.DivIcon(html=f"""<div style="font-family: verdana; color: black; font-weight: bold">{city}</div>""")
+        ).add_to(m)
+
+        # Store travel route (for team-colored lines)
+        if prev_venue:
+            travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
+
+        prev_venue = venue
+        match_number += 1
+
+    # Function to add plane-like dashed line with direction in tube map style
+    def add_plane_line(start, end, color, offset=0):
+        lat1, lon1 = start
+        lat2, lon2 = end
+
+        # Offset the coordinates to create parallel lines if overlapping
+        if offset != 0:
+            lat1 += offset / 1
+            lon1 += offset / 1
+            lat2 += offset / 1
+            lon2 += offset / 1
+
+        # Create an animated polyline with dashed lines representing planes
+        plane_line = AntPath(
+            locations=[[lat1, lon1], [lat2, lon2]],
+            color=color,
+            weight=5,  # Thicker line (3x the current)
+            opacity=0.5,  # Translucent lines
+            dash_array=[10, 20],  # Dash pattern
+            delay=1000  # Animation delay
+        ).add_to(m)
+
+    # Add travel routes to the map with offsets for parallel lines
+    offset = 0
+    for start, end, color in travel_routes:
+        add_plane_line(start, end, color, offset)
+        offset += 0.1  # Increment offset for parallel lines
 
     # Display the map
     folium_static(m, width=1600, height=800)

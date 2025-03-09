@@ -174,8 +174,14 @@ else:
         date, team1, score1, team2, score2, result, venue = match
         lat, lon = venues[venue][1]
 
-        # Choose team color
-        team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
+        # Choose team color of the team that is changing venue
+        if prev_venue:
+            if team1 == team_option:
+                team_color = team_colors.get(team1, "gray")
+            else:
+                team_color = team_colors.get(team2, "gray")
+        else:
+            team_color = team_colors.get(team1 if team1 == team_option else team2, "gray")
 
         # Add match details with match number using DivIcon
         city = venues[venue][0]

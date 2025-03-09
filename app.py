@@ -44,9 +44,16 @@ team_colors = {
 
 # Extract unique teams
 teams = sorted(set([team for match in matches for team in [match[1], match[3]]]))
+option_map = {team: team for team in teams}
+option_map["All Teams"] = "All Teams"
 
-# Sidebar for team selection using single-select pills widget
-team_option = st.sidebar.selectbox("Select Team", ["All Teams"] + teams)
+# Sidebar for team selection using segmented control
+team_option = st.sidebar.segmented_control(
+    "Select Team",
+    options=option_map.keys(),
+    format_func=lambda option: option_map[option],
+    selection_mode="single",
+)
 
 # Filter matches for the selected team
 if team_option == "All Teams":

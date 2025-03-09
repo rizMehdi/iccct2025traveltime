@@ -199,8 +199,6 @@ offset = 0
 for start, end, color in travel_routes:
     add_plane_line(start, end, color, offset)
     offset += 0.01  # Increment offset for parallel lines
-    folium_static(m)
-    time.sleep(1)  # Pause to animate the drawing of each path
 
 # Display the map
 folium_static(m)

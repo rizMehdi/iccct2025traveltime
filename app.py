@@ -243,6 +243,13 @@ if team_option == "All Teams":
     # Streamlit UI
     st.write("Showing travel paths for all teams")
 
+    # Display the charts above the map
+    col1, col2 = st.columns(2)
+    with col1:
+        st.altair_chart(chart_distances, use_container_width=True)
+    with col2:
+        st.altair_chart(chart_results, use_container_width=True)
+
     # Keep map centered
     m = folium.Map(location=[28, 69], zoom_start=5, tiles="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
 

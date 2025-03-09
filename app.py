@@ -2,7 +2,7 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 import math
-from folium.plugins import AntPath, PolyLineTextPath, PolyLineOffset
+from folium.plugins import AntPath, PolyLineTextPath
 import time
 import pandas as pd
 import altair as alt
@@ -257,62 +257,36 @@ if team_option == "All Teams":
     def add_offset(lat, lon, offset=0.005):
         return lat + offset, lon + offset
 
-    # Manage overlays in groups to ease superposition order
-    outlines = folium.FeatureGroup("outlines")
-    line_bg = folium.FeatureGroup("lineBg")
-    bus_lines = folium.FeatureGroup("busLines")
-    bus_stops = folium.FeatureGroup("busStops")
+    # Travel route sequence for all teams
+    travel_routes = calculate_all_teams_travel(matches)
 
-    line_weight = 6
-    line_colors = ["red", "#08f", "#0c0", "#f80"]
-    stops = []
+    # Function to add plane-like dashed line with direction in tube map style
+    def add_plane_line(start, end, color, offset=0):
+        lat1, lon1 = start
+        lat2, lon2 = end
 
-    # Check each team one by one and plot paths
-    for team in teams:
-        prev_venue = None
-        for match in matches:
-            date, team1, score1, team2, score2, result, venue = match
-            if team == team1 or team == team2:
-                lat, lon = venues[venue][1]
-                if prev_venue:
-                    prev_lat, prev_lon = venues[prev_venue][1]
-                    segment_coords = [[prev_lat, prev_lon], [lat, lon]]
-                    stops.append([prev_lat, prev_lon])
-                    stops.append([lat, lon])
-                    lines_on_segment = [0]  # Dummy value to represent a single line
-                    segment_width = len(lines_on_segment) * (line_weight + 1)
-                    folium.PolyLine(
-                        segment_coords, color="#000", weight=segment_width + 5, opacity=1
-                    ).add_to(outlines)
-                    folium.PolyLine(
-                        segment_coords, color="#fff", weight=segment_width + 3, opacity=1
-                    ).add_to(line_bg)
-                    for j, line_number in enumerate(lines_on_segment):
-                        PolyLineOffset(
-                            segment_coords,
-                            color=team_colors[team],
-                            weight=line_weight,
-                            opacity=1,
-                            offset=j * (line_weight + 1) - (segment_width / 2) + ((line_weight + 1) / 2),
-                        ).add_to(bus_lines)
-                prev_venue = venue
+        # Offset the coordinates to create parallel lines if overlapping
+        if offset != 0:
+            lat1 += offset / 1
+            lon1 += offset / 1
+            lat2 += offset / 1
+            lon2 += offset / 1
 
-    # Draw bus stops
-    for stop in stops:
-        folium.CircleMarker(
-            stop,
-            color="#000",
-            fill_color="#ccc",
-            fill_opacity=1,
-            radius=10,
-            weight=4,
-            opacity=1,
-        ).add_to(bus_stops)
+        # Create an animated polyline with dashed lines representing planes
+        plane_line = AntPath(
+            locations=[[lat1, lon1], [lat2, lon2]],
+            color=color,
+            weight=5,  # Thicker line (3x the current)
+            opacity=0.5,  # Translucent lines
+            dash_array=[10, 20],  # Dash pattern
+            delay=1000  # Animation delay
+        ).add_to(m)
 
-    outlines.add_to(m)
-    line_bg.add_to(m)
-    bus_lines.add_to(m)
-    bus_stops.add_to(m)
+    # Add travel routes to the map with offsets for parallel lines
+    offset = 0
+    for start, end, color in travel_routes:
+        add_plane_line(start, end, color, offset)
+        offset += 0.1  # Increment offset for parallel lines
 
     # Display the map
     folium_static(m, width=1600, height=800)

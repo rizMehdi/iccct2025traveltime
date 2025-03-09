@@ -93,13 +93,10 @@ with st.sidebar:
         city = venues[venue][0]  # Extract city name for the expander title
         opponent = team2 if team1 == team_option or team_option == "All Teams" else team1
         
-        with st.expander(f"{date} {city} {team1} vs {opponent}"):
-            st.write(f"🏟 **Full Location**: {venue}")
-            st.write(f"🏆 **Result**: {result}")
-            if result != "Match abandoned" and result != "No result":
-                st.write(f"📊 **Scores**:")
-                st.write(f"   - {team1}: {score1}")
-                st.write(f"   - {team2}: {score2}")
+        with st.expander(f"{date} {city}: {team1} vs {opponent}"):
+            st.write(f"🏟 **{venue}**")
+            st.write(f"🏏 {team1}: {score1}, {team2}: {score2}")
+            st.write(f"🏆 {result}")
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")

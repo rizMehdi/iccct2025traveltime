@@ -149,6 +149,7 @@ m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", scrollW
 # Travel route sequence for selected teams
 travel_routes = []
 prev_venue = None
+match_number = 1
 
 # Add match details and connect travel paths
 for match in filtered_matches:
@@ -158,11 +159,11 @@ for match in filtered_matches:
     # Choose team color
     team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
 
-    # Add match details
+    # Add match details with match number
     folium.Marker(
         [lat, lon],
-        popup=f"<b>{date}</b><br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-        tooltip=f"{date}: {team1} vs {team2}",
+        popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
+        tooltip=f"Match {match_number}: {date}: {team1} vs {team2}",
         icon=folium.Icon(color="red"),
     ).add_to(m)
 
@@ -171,6 +172,7 @@ for match in filtered_matches:
         travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
 
     prev_venue = venue
+    match_number += 1
 
 # Function to add plane-like dashed line with direction in tube map style
 def add_plane_line(start, end, color, offset=0):

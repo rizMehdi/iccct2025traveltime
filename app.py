@@ -40,7 +40,7 @@ team_colors = {
     "Pakistan": "green",
     "Bangladesh": "darkgreen",
     "India": "blue",
-    "South Africa": "darkyellow",  # Updated to a less bright color
+    "South Africa": "darkred",  # Updated to a less bright color
     "England": "darkblue",
     "Australia": "gold",
     "Afghanistan": "red",

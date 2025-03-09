@@ -160,7 +160,7 @@ with st.sidebar:
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
 
 # Keep map centered
-m = folium.Map(location=[28, 69], zoom_start=5, tiles="Stamen Toner", attr='Map tiles by Stamen Design, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
+m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
 
 # Travel route sequence for selected teams
 travel_routes = []

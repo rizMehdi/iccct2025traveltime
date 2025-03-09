@@ -163,7 +163,7 @@ with st.sidebar:
             if prev_venue and prev_venue != venue:
                 lat1, lon1 = venues[prev_venue][1]
                 lat2, lon2 = venues[venue][1]
-                distance = haversine(lat1, lon1, lat2, lon2)
+                distance = haversine(lat1, lon2, lat2, lon2)
                 st.warning(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
             
             result_emoji = get_result_emoji(result, team_option, team1, team2)

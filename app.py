@@ -93,6 +93,7 @@ else:
 
 # Sidebar for Match List with separate expanders
 with st.sidebar:
+    prev_venue = None
     for match in filtered_matches:
         date, team1, score1, team2, score2, result, venue = match
         city = venues[venue][0]  # Extract city name for the expander title
@@ -104,15 +105,14 @@ with st.sidebar:
             st.write(f"🏆 {result}")
             
             # Display travel distance if not the first venue
-            if result != "Match abandoned" and result != "No result":
-                if match != filtered_matches[0]:  # Skip first match for no travel
-                    prev_match = filtered_matches[filtered_matches.index(match) - 1]
-                    prev_venue = prev_match[6]  # Previous venue
-                    if prev_venue != venue:
-                        lat1, lon1 = venues[prev_venue][1]
-                        lat2, lon2 = venues[venue][1]
-                        distance = haversine(lat1, lon1, lat2, lon2)
-                        st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
+            if prev_venue and prev_venue != venue:
+                lat1, lon1 = venues[prev_venue][1]
+                lat2, lon2 = venues[venue][1]
+                distance = haversine(lat1, lon1, lat2, lon2)
+                st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
+            else:
+                st.write("No Travel")
+            prev_venue = venue
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")

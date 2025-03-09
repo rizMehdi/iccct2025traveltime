@@ -2,7 +2,7 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 import math
-from folium.plugins import AntPath
+from folium.plugins import AntPath, PolyLineTextPath
 
 # Match venues and their coordinates (city only for the expander titles)
 venues = {
@@ -105,8 +105,6 @@ with st.sidebar:
             lat2, lon2 = venues[venue][1]
             distance = haversine(lat1, lon1, lat2, lon2)
             st.write(f"✈️ Travel from {venues[prev_venue][0]} to {venues[venue][0]}: {distance:.2f} km.")
-        elif prev_venue:
-            st.write("No Travel")
         
         with st.expander(f"{date}, {city}: {team1} vs {opponent}"):
             st.write(f"🏟 **{venue}**")
@@ -156,15 +154,14 @@ def add_plane_line(start, end, color):
     # Create a polyline with dashed lines representing planes
     plane_line = folium.PolyLine(
         [[lat1, lon1], [lat2, lon2]],
-        weight=3,
+        weight=1,
         color=color,
-        dash_array="5, 10",  # Dash pattern (less frequent planes)
     ).add_to(m)
 
     # Add direction arrow
-    folium.Marker(
-        location=[(lat1 + lat2) / 2, (lon1 + lon2) / 2],
-        icon=folium.DivIcon(html=f"""<div style="font-size: 12px; color: {color};">→</div>""")
+    attr = {"font-weight": "bold", "font-size": "24"}
+    PolyLineTextPath(
+        plane_line, "\u2708     ", repeat=True, offset=8, attributes=attr
     ).add_to(m)
 
 # Add travel routes to the map

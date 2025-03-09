@@ -1,8 +1,8 @@
 import streamlit as st
 import folium
 from streamlit_folium import folium_static
-from folium.plugins import AntPath
 import math
+from folium import Icon
 
 # Match venues and their coordinates
 venues = {
@@ -129,17 +129,22 @@ for match in filtered_matches:
 
     prev_venue = venue
 
+# Function to add arrows to the map
+def add_arrow(start, end, color):
+    # Create a folium PolyLine
+    folium.PolyLine(locations=[start, end], color=color, weight=3, opacity=0.7).add_to(m)
+
+    # Add an arrow marker at the end point
+    folium.Marker(
+        location=end,
+        icon=Icon(icon='arrow-right', prefix='fa', color=color),
+        popup="Travel direction",
+    ).add_to(m)
+
 # Add animated travel paths with arrows (direction of travel)
 for (start, end, colors) in travel_routes:
     for i, color in enumerate(colors):
-        AntPath(
-            locations=[start, end],
-            dash_array=[10, 20],
-            weight=3,
-            color=color,
-            delay=800 + (i * 200),  # Slight delay for each color transition
-            arrow=True  # Adds arrows to indicate direction of travel
-        ).add_to(m)
+        add_arrow(start, end, color)
 
 # Display interactive map
 folium_static(m)

@@ -4,6 +4,8 @@ from streamlit_folium import folium_static
 import math
 from folium.plugins import AntPath, PolyLineTextPath
 import time
+from streamlit_folium import geom_livemap, tilesets
+
 st.sidebar.title("🏏 ICC Champions Trophy 2025 - Team Travel")
 
 # Match venues and their coordinates (city only for the expander titles)
@@ -160,7 +162,7 @@ with st.sidebar:
 st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' else 'all teams'}")
 
 # Keep map centered
-m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron", attr='Map tiles by CartoDB, under CC BY 3.0. Data by OpenStreetMap, under ODbL.', scrollWheelZoom=False, zoomControl=False)
+m = geom_livemap(location=[28, 69], zoom_start=5, tiles=tilesets.CARTO_POSITRON_NO_LABELS, scrollWheelZoom=False, zoomControl=False)
 
 # Travel route sequence for selected teams
 travel_routes = []

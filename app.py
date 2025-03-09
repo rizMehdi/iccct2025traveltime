@@ -3,6 +3,7 @@ import folium
 from streamlit_folium import folium_static
 import math
 from folium import Icon
+from folium.plugins import AntPath
 
 # Match venues and their coordinates
 venues = {
@@ -129,22 +130,32 @@ for match in filtered_matches:
 
     prev_venue = venue
 
-# Function to add arrows to the map
-def add_arrow(start, end, color):
-    # Create a folium PolyLine
-    folium.PolyLine(locations=[start, end], color=color, weight=3, opacity=0.7).add_to(m)
+# Function to add arrows to the path at even intervals
+def add_arrows_on_path(start, end, color):
+    lat1, lon1 = start
+    lat2, lon2 = end
 
-    # Add an arrow marker at the end point
-    folium.Marker(
-        location=end,
-        icon=Icon(icon='arrow-right', prefix='fa', color=color),
-        popup="Travel direction",
-    ).add_to(m)
+    # Create the Polyline between the points
+    folium.PolyLine([start, end], color=color, weight=3, opacity=0.7).add_to(m)
+
+    # Calculate the number of arrows based on distance
+    num_arrows = 5  # You can adjust this number based on how many arrows you want
+    for i in range(1, num_arrows + 1):
+        # Calculate positions along the line
+        lat = lat1 + (lat2 - lat1) * i / (num_arrows + 1)
+        lon = lon1 + (lon2 - lon1) * i / (num_arrows + 1)
+
+        # Add the arrow marker
+        folium.Marker(
+            location=[lat, lon],
+            icon=Icon(icon='arrow-right', prefix='fa', color=color),
+            popup="Travel direction",
+        ).add_to(m)
 
 # Add animated travel paths with arrows (direction of travel)
 for (start, end, colors) in travel_routes:
     for i, color in enumerate(colors):
-        add_arrow(start, end, color)
+        add_arrows_on_path(start, end, color)
 
 # Display interactive map
 folium_static(m)

@@ -2,8 +2,8 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 from folium.plugins import AntPath
-from geopy.distance import great_circle
 import numpy as np
+from scipy.interpolate import interp1d
 
 # Venue coordinates (Pakistan & Dubai)
 venues = {
@@ -37,25 +37,31 @@ for city, (lat, lon) in venues.items():
         icon=folium.Icon(color="blue", icon="info-sign")
     ).add_to(m)
 
-# Function to generate curved path using great-circle interpolation
-def generate_curve(start_coords, end_coords, num_points=20):
-    lats = np.linspace(start_coords[0], end_coords[0], num_points)
-    lons = np.linspace(start_coords[1], end_coords[1], num_points)
+# Function to generate smooth Bezier curve between two points
+def bezier_curve(start, end, control_offset=3, num_points=30):
+    lat1, lon1 = start
+    lat2, lon2 = end
 
-    # Add a slight offset to the middle points to create a curve effect
-    mid_idx = len(lats) // 2
-    lats[mid_idx] += 1.5  # Increase latitude for curve
-    lons[mid_idx] -= 1.5  # Decrease longitude for curve
+    # Control point to create curvature (Offset for a nice curve)
+    control_lat = (lat1 + lat2) / 2 + control_offset
+    control_lon = (lon1 + lon2) / 2 - control_offset
 
-    return list(zip(lats, lons))
+    # Create parameterized values
+    t = np.linspace(0, 1, num_points)
+    
+    # Compute Bezier curve points
+    curve_lats = (1 - t) ** 2 * lat1 + 2 * (1 - t) * t * control_lat + t ** 2 * lat2
+    curve_lons = (1 - t) ** 2 * lon1 + 2 * (1 - t) * t * control_lon + t ** 2 * lon2
 
-# Add animated curved travel paths
+    return list(zip(curve_lats, curve_lons))
+
+# Add animated smooth travel paths
 for start, end, time in travel_data:
     start_coords = venues[start]
     end_coords = venues[end]
 
-    # Generate a smooth curved path
-    curve_path = generate_curve(start_coords, end_coords)
+    # Generate a smooth Bezier curve
+    curve_path = bezier_curve(start_coords, end_coords)
 
     # Animated AntPath for movement
     AntPath(

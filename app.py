@@ -38,7 +38,7 @@ team_colors = {
     "India": ["blue", "darkblue"],
     "South Africa": ["green", "darkgreen"],
     "England": ["red", "darkred"],
-    "Australia": ["yellow", "darkyellow"],  # Updated to yellow and green
+    "Australia": ["green", "darkyellow"],  # Updated to yellow and green
     "Afghanistan": ["red", "darkred"],
 }
 

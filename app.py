@@ -83,13 +83,13 @@ def calculate_total_distance(matches, team):
     return total_distance, travel_details
 
 # Show travel kilometers below the dropdown
-if team_option != "All Teams":
-    total_distance, travel_details = calculate_total_distance(filtered_matches, team_option)
-    st.sidebar.write(f"✈️ **Total Travel Distance for {team_option}: {total_distance:.2f} km**")
-    for detail in travel_details:
-        st.sidebar.write(detail)
-else:
-    st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
+# if team_option != "All Teams":
+#     total_distance, travel_details = calculate_total_distance(filtered_matches, team_option)
+#     st.sidebar.write(f"✈️ **Total Travel Distance for {team_option}: {total_distance:.2f} km**")
+#     for detail in travel_details:
+#         st.sidebar.write(detail)
+# else:
+#     st.sidebar.write("✈️ **Travel Distance for All Teams**: Calculated individually for each team")
 
 # Sidebar for Match List with separate expanders
 with st.sidebar:

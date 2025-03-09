@@ -176,12 +176,11 @@ else:
         # Choose team color
         team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, "gray")
 
-        # Add match details with match number
+        # Add match details with match number using DivIcon
         folium.Marker(
-            [lat, lon],
+            location=[lat, lon],
             popup=f"<b>Match {match_number}</b><br>{date}<br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
-            tooltip=f"Match {match_number}: {date}: {team1} vs {team2}",
-            icon=folium.Icon(color="red"),
+            icon=folium.DivIcon(html=f"""<div style="font-family: courier new; color: blue">{team1} vs {team2}</div>""")
         ).add_to(m)
 
         # Store travel route (for team-colored lines)

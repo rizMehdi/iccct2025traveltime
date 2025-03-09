@@ -353,7 +353,7 @@ else:
     offset = 0
     for start, end, color in travel_routes:
         add_plane_line(start, end, color, offset)
-        offset += 0.1  # Increment offset for parallel lines
+        offset += 0.01  # Increment offset for parallel lines
 
     # Display the map
     folium_static(m, width=1600, height=800)

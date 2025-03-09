@@ -51,12 +51,15 @@ if team_option == "All Teams":
 else:
     filtered_matches = [match for match in matches if team_option in [match[1], match[3]]]
 
-# Sidebar for Match List in Expander
-with st.sidebar.expander("Matches List"):
+# Sidebar for Match List with separate expanders
+with st.sidebar:
     for match in filtered_matches:
         date, team1, score1, team2, score2, result, venue = match
         opponent = team2 if team1 == team_option or team_option == "All Teams" else team1
-        st.write(f"📅 **{date}**: {team1} vs {opponent}\n- 🏟 **Venue:** {venue}\n- 🏆 **Result:** {result}")
+        with st.expander(f"Match: {date} - {team1} vs {opponent}"):
+            st.write(f"🏟 **Venue**: {venue}")
+            st.write(f"📊 **Scores**: {team1} {score1} vs {team2} {score2}")
+            st.write(f"🏆 **Result**: {result}")
 
 # Streamlit UI
 st.title("🏏 Cricket Tournament Travel & Match Visualization")

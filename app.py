@@ -1,8 +1,8 @@
 import streamlit as st
 import folium
 from streamlit_folium import folium_static
-from folium.plugins import MarkerCluster
 import math
+from folium.plugins import AntPath
 
 # Match venues and their coordinates (city only for the expander titles)
 venues = {
@@ -30,13 +30,13 @@ matches = [
 
 # Assign colors to each team (Modified Australia to yellow + green)
 team_colors = {
-    "New Zealand": ["black"],
+    "New Zealand": ["black", "white"],
     "Pakistan": ["green", "white"],
     "Bangladesh": ["green", "red"],
     "India": ["blue", "orange"],
     "South Africa": ["green", "black"],
     "England": ["red", "white"],
-    "Australia": ["yellow", "green"], 
+    "Australia": ["yellow", "green"],  # Updated to yellow and green
     "Afghanistan": ["red"],
 }
 
@@ -51,6 +51,40 @@ if team_option == "All Teams":
     filtered_matches = matches
 else:
     filtered_matches = [match for match in matches if team_option in [match[1], match[3]]]
+
+# Function to calculate distance between two points (Haversine formula)
+def haversine(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of the Earth in km
+    phi1 = math.radians(lat1)
+    phi2 = math.radians(lat2)
+    delta_phi = math.radians(lat2 - lat1)
+    delta_lambda = math.radians(lon2 - lon1)
+
+    a = math.sin(delta_phi / 2)**2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    return R * c  # Distance in km
+
+# Calculate total travel distance for the selected team
+def calculate_total_distance(matches, team):
+    total_distance = 0
+    prev_venue = None
+    for match in matches:
+        date, team1, score1, team2, score2, result, venue = match
+        if team == team1 or team == team2:
+            lat, lon = venues[venue][1]
+            if prev_venue:
+                prev_lat, prev_lon = venues[prev_venue][1]
+                total_distance += haversine(prev_lat, prev_lon, lat, lon)
+            prev_venue = venue
+    return total_distance
+
+# Show travel kilometers below the dropdown
+if team_option != "All Teams":
+    total_distance = calculate_total_distance(filtered_matches, team_option)
+    st.sidebar.write(f"🚗 **Total Travel Distance for {team_option}**: {total_distance:.2f} km")
+else:
+    st.sidebar.write("🚗 **Travel Distance for All Teams**: Calculated individually for each team")
 
 # Sidebar for Match List with separate expanders
 with st.sidebar:
@@ -74,36 +108,52 @@ st.write(f"Showing travel paths for {team_option if team_option != 'All Teams' e
 # Keep map centered
 m = folium.Map(location=[28, 69], zoom_start=5, tiles="cartodbpositron")
 
-# Create MarkerCluster object
-marker_cluster = MarkerCluster().add_to(m)
-
 # Travel route sequence for selected teams
+travel_routes = []
 prev_venue = None
 
 # Add match details and connect travel paths
 for match in filtered_matches:
     date, team1, score1, team2, score2, result, venue = match
     lat, lon = venues[venue][1]
-    
+
     # Choose team color(s)
     team_color = team_colors.get(team1 if team1 == team_option or team_option == "All Teams" else team2, ["gray"])
 
-    # Add match details to MarkerCluster
+    # Add match details
     folium.Marker(
         [lat, lon],
         popup=f"<b>{date}</b><br>{team1} {score1} vs {team2} {score2}<br><b>{result}</b>",
         tooltip=f"{date}: {team1} vs {team2}",
         icon=folium.Icon(color=team_color[0]),
-    ).add_to(marker_cluster)
+    ).add_to(m)
 
-    # Count matches at each location
-    match_count = sum(1 for match in filtered_matches if match[6] == venue)
-    if match_count > 1:
-        folium.Marker(
-            [lat, lon],
-            icon=folium.DivIcon(html=f'<div>{match_count} matches</div>'),
-            popup=f"{venue} - {match_count} matches",
-        ).add_to(marker_cluster)
+    # Store travel route (for team-colored lines)
+    if prev_venue:
+        travel_routes.append((venues[prev_venue][1], (lat, lon), team_color))
+
+    prev_venue = venue
+
+# Function to add arrows to the path (Arrow will be part of the path line)
+def add_arrow_on_path(start, end, color):
+    lat1, lon1 = start
+    lat2, lon2 = end
+
+    # Create the AntPath with animated arrows
+    path = [start, end]
+    AntPath(
+        locations=path,
+        color=color,
+        weight=3,
+        opacity=0.8,
+        dash_array=[10, 10],  # Adjust this to make the path feel more "arrow-like"
+        delay=500,
+    ).add_to(m)
+
+# Add animated travel paths with arrows (direction of travel)
+for (start, end, colors) in travel_routes:
+    for i, color in enumerate(colors):
+        add_arrow_on_path(start, end, color)
 
 # Display interactive map
 folium_static(m)

@@ -31,7 +31,7 @@ matches = [
     ("2 Mar", "India", "249/9 (50)", "New Zealand", "205 (45.3)", "India won by 44 runs", "Dubai International Cricket Stadium, Dubai"),
     ("4 Mar", "Australia", "264 (49.3)", "India", "267/6 (48.1)", "India won by 4 wickets", "Dubai International Cricket Stadium, Dubai"),
     ("5 Mar", "New Zealand", "362/6 (50)", "South Africa", "312/9 (50)", "New Zealand won by 50 runs", "Gaddafi Stadium, Lahore"),
-    ("9 Mar", "New Zealand", "-", "India", "-", "Being Played", "Dubai International Cricket Stadium, Dubai"),
+    ("9 Mar", "New Zealand", "251/7 (50)", "India", "254/6 (49)", "India won by 4 wickets", "Dubai International Cricket Stadium, Dubai"),
 ]
 
 # Assign colors to each team (as close as possible to their cricket team colors)
@@ -233,7 +233,7 @@ def add_plane_line(start, end, color, offset=0):
 offset = 0
 for start, end, color in travel_routes:
     add_plane_line(start, end, color, offset)
-    offset += 0.09  # Increment offset for parallel lines
+    offset += 0.1  # Increment offset for parallel lines
     # offset += 0.01  # Increment offset for parallel lines
 
 # Display the map

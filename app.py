@@ -2,7 +2,7 @@ import streamlit as st
 import folium
 from streamlit_folium import folium_static
 import math
-from folium.plugins import AntPath, PolyLineTextPath
+from folium.plugins import AntPath, PolyLineTextPath, PolyLineOffset
 import time
 import pandas as pd
 import altair as alt
@@ -260,33 +260,53 @@ if team_option == "All Teams":
     # Travel route sequence for all teams
     travel_routes = calculate_all_teams_travel(matches)
 
-    # Function to add plane-like dashed line with direction in tube map style
-    def add_plane_line(start, end, color, offset=0):
-        lat1, lon1 = start
-        lat2, lon2 = end
+    # Manage overlays in groups to ease superposition order
+    outlines = folium.FeatureGroup("outlines")
+    line_bg = folium.FeatureGroup("lineBg")
+    bus_lines = folium.FeatureGroup("busLines")
+    bus_stops = folium.FeatureGroup("busStops")
 
-        # Offset the coordinates to create parallel lines if overlapping
-        if offset != 0:
-            lat1 += offset / 1
-            lon1 += offset / 1
-            lat2 += offset / 1
-            lon2 += offset / 1
+    line_weight = 6
+    line_colors = ["red", "#08f", "#0c0", "#f80"]
+    stops = []
 
-        # Create an animated polyline with dashed lines representing planes
-        plane_line = AntPath(
-            locations=[[lat1, lon1], [lat2, lon2]],
-            color=color,
-            weight=5,  # Thicker line (3x the current)
-            opacity=0.5,  # Translucent lines
-            dash_array=[10, 20],  # Dash pattern
-            delay=1000  # Animation delay
-        ).add_to(m)
-
-    # Add travel routes to the map with offsets for parallel lines
-    offset = 0
     for start, end, color in travel_routes:
-        add_plane_line(start, end, color, offset)
-        offset += 0.1  # Increment offset for parallel lines
+        segment_coords = [start, end]
+        stops.append(start)
+        stops.append(end)
+        lines_on_segment = [0]  # Dummy value to represent a single line
+        segment_width = len(lines_on_segment) * (line_weight + 1)
+        folium.PolyLine(
+            segment_coords, color="#000", weight=segment_width + 5, opacity=1
+        ).add_to(outlines)
+        folium.PolyLine(
+            segment_coords, color="#fff", weight=segment_width + 3, opacity=1
+        ).add_to(line_bg)
+        for j, line_number in enumerate(lines_on_segment):
+            PolyLineOffset(
+                segment_coords,
+                color=color,
+                weight=line_weight,
+                opacity=1,
+                offset=j * (line_weight + 1) - (segment_width / 2) + ((line_weight + 1) / 2),
+            ).add_to(bus_lines)
+
+    # Draw bus stops
+    for stop in stops:
+        folium.CircleMarker(
+            stop,
+            color="#000",
+            fill_color="#ccc",
+            fill_opacity=1,
+            radius=10,
+            weight=4,
+            opacity=1,
+        ).add_to(bus_stops)
+
+    outlines.add_to(m)
+    line_bg.add_to(m)
+    bus_lines.add_to(m)
+    bus_stops.add_to(m)
 
     # Display the map
     folium_static(m, width=1600, height=800)
